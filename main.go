@@ -43,7 +43,7 @@ func usage(retCode int) {
 		f = os.Stdout
 	}
 
-	fmt.Fprintln(f, "usage: <|yaml|0..9|9|-|> [count]")
+	fmt.Fprintln(f, "usage: <|yaml|0..9|0-9|9|-|> [count]")
 	os.Exit(retCode)
 }
 func usageAndDie(retCode int, a ...interface{}) {
@@ -104,31 +104,36 @@ func cli() {
 		usageAndDie(1, "we don't handle binary inputs for now")
 	}
 
-	looksLikeRange := false
+	var looksLikeRange string
 	{
 		if inputsLineCount == 1 {
 			dotCount := 0
+			dashCount := 0
 			for _, v := range inputs {
 				switch v {
 				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 				case '.':
 					dotCount++
+				case '-':
+					dashCount++
 				default:
-					looksLikeRange = false
+					looksLikeRange = ""
 					break
 				}
 			}
-			if dotCount != 2 {
-				looksLikeRange = false
+			if dotCount == 2 && dashCount == 0 {
+				looksLikeRange = ".."
+			} else if dotCount == 0 && dashCount == 1 {
+				looksLikeRange = "-"
 			} else {
-				looksLikeRange = true
+				looksLikeRange = ""
 			}
 		}
 	}
 
-	parseRange := func() error {
+	parseRange := func(rangeSeperator string) error {
 		var err error
-		splitResult := strings.Split(inputs, "..")
+		splitResult := strings.Split(inputs, rangeSeperator)
 		if splitResult[0] > splitResult[1] {
 			start, err = strconv.Atoi(splitResult[1])
 			if err != nil {
@@ -152,8 +157,8 @@ func cli() {
 	}
 
 	// attempt to parse a..b range
-	if looksLikeRange {
-		err = parseRange()
+	if looksLikeRange != "" {
+		err = parseRange(looksLikeRange)
 		if err == nil {
 			return
 		}
