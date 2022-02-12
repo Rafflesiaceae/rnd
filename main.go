@@ -109,6 +109,7 @@ func cli() {
 		if inputsLineCount == 1 {
 			dotCount := 0
 			dashCount := 0
+			endashCount := 0
 			for _, v := range inputs {
 				switch v {
 				case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
@@ -116,15 +117,19 @@ func cli() {
 					dotCount++
 				case '-':
 					dashCount++
+				case '–':
+					endashCount++
 				default:
 					looksLikeRange = ""
 					break
 				}
 			}
-			if dotCount == 2 && dashCount == 0 {
+			if dotCount == 2 && dashCount == 0 && endashCount == 0 {
 				looksLikeRange = ".."
-			} else if dotCount == 0 && dashCount == 1 {
+			} else if dotCount == 0 && dashCount == 1 && endashCount == 0 {
 				looksLikeRange = "-"
+			} else if dotCount == 0 && dashCount == 0 && endashCount == 1 {
+				looksLikeRange = "–"
 			} else {
 				looksLikeRange = ""
 			}
