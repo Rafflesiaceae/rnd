@@ -63,7 +63,7 @@ func cli() {
 		}
 	}
 
-	if len(args) < 1 && len(args) > 2 {
+	if len(args) < 1 || len(args) > 2 {
 		usageAndDie(1, "pass me 1-2 args")
 	}
 
