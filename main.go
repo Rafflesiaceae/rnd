@@ -23,6 +23,8 @@ var (
 	choices []string
 
 	count int = 1
+
+	optJoin = false
 )
 
 func init() {
@@ -43,7 +45,7 @@ func usage(retCode int) {
 		f = os.Stdout
 	}
 
-	fmt.Fprintln(f, "usage: <|yaml|0..9|0-9|9|-|> [count]")
+	fmt.Fprintln(f, "usage: [-j|--join] <|yaml|0..9|0-9|9|-|> [count]")
 	os.Exit(retCode)
 }
 func usageAndDie(retCode int, a ...interface{}) {
@@ -54,12 +56,17 @@ func usageAndDie(retCode int, a ...interface{}) {
 func cli() {
 	var err error
 
-	args := os.Args[1:]
+	rawArgs := os.Args[1:]
 
-	for _, arg := range args {
+	args := make([]string, 0)
+	for _, arg := range rawArgs {
 		switch arg {
 		case "-h", "--help":
 			usage(0)
+		case "-j", "--join": // don't print newlines
+			optJoin = true
+		default:
+			args = append(args, arg)
 		}
 	}
 
@@ -193,12 +200,17 @@ func main() {
 	}
 
 	for i := 0; i < count; i++ {
+		var result string
 		if choices == nil {
-			result := start + (rand.Intn(end - start + 1))
-			fmt.Println(result)
+			result = strconv.Itoa(start + (rand.Intn(end - start + 1)))
 		} else {
-			result := rand.Intn(len(choices))
-			fmt.Println(choices[result])
+			result = choices[rand.Intn(len(choices))]
+		}
+
+		if optJoin {
+			fmt.Print(result)
+		} else {
+			fmt.Println(result)
 		}
 	}
 }
